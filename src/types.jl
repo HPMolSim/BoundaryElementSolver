@@ -6,7 +6,7 @@ struct MeshedSurface{T}
     areas::Vector{T}
 end
 
-struct Charge{T}
+struct PointCharge{T}
     position::SVector{3, T}
     charge::T
     ϵ::T
@@ -23,7 +23,7 @@ struct PoissonSystem{T}
     ϵ_medium::T
     ϵ_particle::Vector{T}
 
-    charges::Vector{Charge{T}}
+    charges::Vector{PointCharge{T}}
 end
 
 struct PoissonSolver{T}
