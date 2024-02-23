@@ -3,6 +3,10 @@ uuid = "5549ab0b-31e4-4ed4-b158-6587cdd298ac"
 authors = ["Xuanzhao Gao <gaoxuanzhao@gmail.com> and contributors"]
 version = "1.0.0-DEV"
 
+[deps]
+IterativeSolvers = "42fd0dbc-a981-5370-80f2-aaf504508153"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+
 [compat]
 julia = "1"
 
