@@ -1,6 +1,6 @@
 module BoundaryElementSolver
 
-using LinearAlgebra, IterativeSolvers
+using LinearAlgebra, IterativeSolvers, StaticArrays
 
 include("types.jl")
 include("geometry.jl")

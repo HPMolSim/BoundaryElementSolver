@@ -1,5 +1,7 @@
+# vertices, normals and faces will be loaded from files.
 struct MeshedSurface{T}
-    vertices::Vector{SVector{3, T}}
+    vertices::Dict{Int64, SVector{3, T}}
+    normals::Dict{Int64, SVector{3, T}}
     faces::Vector{SVector{3, Int}}
     points::Vector{SVector{3, T}}
     normals::Vector{SVector{3, T}}
