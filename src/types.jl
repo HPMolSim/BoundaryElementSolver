@@ -3,8 +3,8 @@ struct MeshedSurface{T}
     vertices::Dict{Int64, SVector{3, T}}
     normals::Dict{Int64, SVector{3, T}}
     faces::Vector{SVector{3, Int}}
-    points::Vector{SVector{3, T}}
-    normals::Vector{SVector{3, T}}
+    tri_points::Vector{SVector{3, T}}
+    tri_normals::Vector{SVector{3, T}}
     areas::Vector{T}
 end
 
