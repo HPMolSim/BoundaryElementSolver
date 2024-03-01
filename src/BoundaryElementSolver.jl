@@ -2,6 +2,10 @@ module BoundaryElementSolver
 
 using LinearAlgebra, IterativeSolvers, StaticArrays, Artifacts
 
+export model_from_artifact, load_sphere, load_model
+export Model2Object
+
+
 include("types.jl")
 include("io.jl")
 include("geometry.jl")

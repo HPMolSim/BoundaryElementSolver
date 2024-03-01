@@ -1,6 +1,6 @@
 using BoundaryElementSolver
-using Test
+using Test, LinearAlgebra
 
 @testset "BoundaryElementSolver.jl" begin
-    # Write your tests here.
+    include("geometry.jl")
 end

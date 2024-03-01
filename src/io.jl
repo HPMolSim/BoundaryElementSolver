@@ -1,9 +1,10 @@
 function convert_vert(vert_lines::Vector{String}; data_type::DataType = Float64)
     verts = Vector{Tuple{Int64, Tuple{SVector{3, data_type}, SVector{3, data_type}}}}()
     for vert_line in vert_lines
-        id, x, y, z, nx, ny, nz, u1, u2 = split(vert_line)
+        id, nx, ny, nz, x, y, z, u1, u2 = split(vert_line)
         id = parse(Int64, id)
-        x, y, z, nx, ny, nz = map(x -> parse(data_type, x), [x, y, z, nx, ny, nz])
+        nx, ny, nz, x, y, z = map(x -> parse(data_type, x), [nx, ny, nz, x, y, z])
+        nx, ny, nz = [nx, ny, nz] ./ sqrt(nx^2 + ny^2 + nz^2)
         push!(verts, (id, (SVector{3, data_type}(x, y, z), SVector{3, data_type}(nx, ny, nz))))
     end
     return Dict(verts)
@@ -43,11 +44,16 @@ function load_model(path_vert::String, path_face::String; data_type::DataType = 
     return vert_dat, face_dat
 end
 
-function model_from_artifact(name::String; data_type::DataType = Float64)
-    path_vert = joinpath(artifact"geodesic_grid", name * "vert.dat")
-    path_face = joinpath(artifact"geodesic_grid", name * "face.dat")
+function model_from_artifact(artifact_name::String, name::String; data_type::DataType = Float64)
+    path_artifact = @artifact_str artifact_name
+    path_vert = joinpath(path_artifact, name * "vert.dat")
+    path_face = joinpath(path_artifact, name * "face.dat")
 
     verts, faces = load_model(path_vert, path_face; data_type)
 
     return Model{data_type}(verts, faces)
+end
+
+function load_sphere(name::String; data_type::DataType = Float64)
+    return model_from_artifact("geodesic_grid", name; data_type)
 end
