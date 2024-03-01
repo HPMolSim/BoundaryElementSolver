@@ -1,34 +1,40 @@
 # vertices, normals and faces will be loaded from files.
-struct MeshedSurface{T}
-    vertices::Dict{Int64, SVector{3, T}}
-    normals::Dict{Int64, SVector{3, T}}
+struct Model{T}
+    verts::Dict{Int64, Tuple{SVector{3, T}, SVector{3, T}}}
     faces::Vector{SVector{3, Int}}
-    tri_points::Vector{SVector{3, T}}
-    tri_normals::Vector{SVector{3, T}}
-    areas::Vector{T}
 end
 
-struct PointCharge{T}
+struct Triangle{T}
+    r::SVector{3, T}
+    n::SVector{3, T}
+    a::T
+end
+
+mutable struct MeshedObject{T}
+    # info of surfaces
+    tris::Vector{Triangle{T}}
+    center::SVector{3, T}
+    angle::SVector{3, T}
+    ϵ::T
+end
+
+mutable struct PointCharge{T}
     position::SVector{3, T}
     charge::T
     ϵ::T
 end
 
-struct PoissonSystem{T}
+mutable struct PoissonSystem{T}
+    ϵ_medium::T
     N_s::Int # number of surfaces
     N_c::Int # number of charges
     N_m::Vector{Int} # number of points on each surface
 
-    surfaces::Vector{MeshedSurface{T}}
-    centers::Vector{SVector{3, T}}
-    
-    ϵ_medium::T
-    ϵ_particle::Vector{T}
-
+    surfaces::Vector{MeshedObject{T}}
     charges::Vector{PointCharge{T}}
 end
 
-struct PoissonSolver{T}
+mutable struct PoissonSolver{T}
     Lhs::AbstractArray{T, 2}
     Rhs::AbstractArray{T, 1}
     Preconditioner::AbstractArray{T, 2}
