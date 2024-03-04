@@ -4,9 +4,10 @@ struct Vertex{T}
     n::SVector{3, T} # normal
 end
 
-Vertex(p::NTuple{3, T}, n::NTuple{3, T}) where{T} = Vertex(SVector{3, T}(p), SVector{3, T}(n))
+Vertex(p::NTuple{3, T}, n::NTuple{3, T}) where{T} = Vertex(SVector{3, T}(p), SVector{3, T}(n ./ norm(n)))
 
-Base.:(+)(a::Vertex{T}, b::Vertex{T}) where{T} = Vertex(a.p + b.p, a.n + b.n)
+mid(a::Vertex{T}, b::Vertex{T}) where{T} = Vertex{T}(SVector{3, T}((a.p + b.p)/2), SVector{3, T}((a.n + b.n)/norm(a.n + b.n)))
+mid(a::Vertex{T}, b::Vertex{T}, c::Vertex{T}) where{T} = Vertex{T}(SVector{3, T}((a.p + b.p + c.p)/3), SVector{3, T}((a.n + b.n + c.n)/norm((a.n + b.n + c.n))))
 
 struct Model{T}
     verts::Vector{Vertex{T}}

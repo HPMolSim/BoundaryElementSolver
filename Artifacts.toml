@@ -1,6 +1,0 @@
-[geodesic_grid]
-git-tree-sha1 = "e7afd9142353ae0efc860f6257e5539f195ee586"
-
-    [[geodesic_grid.download]]
-    sha256 = "31cbad69fe96f4f2a321a67f2e717cf3acce8667794b7553815bedbf4a11747e"
-    url = "https://gist.github.com/ArrogantGao/514edcb099daeb9ea22d6a61d6d2a376/raw/e7afd9142353ae0efc860f6257e5539f195ee586.tar.gz"

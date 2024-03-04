@@ -1,7 +1,7 @@
 module BoundaryElementSolver
 
 using LinearAlgebra, IterativeSolvers, StaticArrays, Artifacts
-using Plots, Plotly
+using Plots
 
 export model_from_artifact, load_sphere, load_model
 export Model2Object
@@ -10,9 +10,11 @@ export Model2Object
 include("types.jl")
 include("io.jl")
 include("geometry.jl")
+include("sphere.jl")
 
 include("Poisson.jl")
-
 include("linear_solver.jl")
+
+include("display.jl")
 
 end

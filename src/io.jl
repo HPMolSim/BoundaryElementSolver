@@ -54,6 +54,6 @@ function model_from_artifact(artifact_name::String, name::String; data_type::Dat
     return Model{data_type}(verts, faces)
 end
 
-function load_sphere(name::String; data_type::DataType = Float64)
-    return model_from_artifact("geodesic_grid", name; data_type)
-end
+# function load_sphere(name::String; data_type::DataType = Float64)
+#     return model_from_artifact("geodesic_grid", name; data_type)
+# end
