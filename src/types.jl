@@ -1,6 +1,15 @@
 # vertices, normals and faces will be loaded from files.
+struct Vertex{T}
+    p::SVector{3, T} # position
+    n::SVector{3, T} # normal
+end
+
+Vertex(p::NTuple{3, T}, n::NTuple{3, T}) where{T} = Vertex(SVector{3, T}(p), SVector{3, T}(n))
+
+Base.:(+)(a::Vertex{T}, b::Vertex{T}) where{T} = Vertex(a.p + b.p, a.n + b.n)
+
 struct Model{T}
-    verts::Dict{Int64, Tuple{SVector{3, T}, SVector{3, T}}}
+    verts::Vector{Vertex{T}}
     faces::Vector{SVector{3, Int}}
 end
 

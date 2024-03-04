@@ -1,6 +1,7 @@
 module BoundaryElementSolver
 
 using LinearAlgebra, IterativeSolvers, StaticArrays, Artifacts
+using Plots, Plotly
 
 export model_from_artifact, load_sphere, load_model
 export Model2Object
