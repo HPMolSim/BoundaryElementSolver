@@ -1,15 +1,47 @@
 @inline function Coulomb(vert_i::SVector{3, T}, vert_j::SVector{3, T}) where{T}
-    return one(T) / norm(vert_i - vert_j)
+    return one(T) / norm(vert_i - vert_j) / T(4π)
 end
 
 @inline function partial_ni_Coulomb(vert_i::SVector{3, T}, vert_j::SVector{3, T}, n_i::SVector{3, T}) where{T}
-    return - dot(vert_i - vert_j, n_i) / norm(vert_i - vert_j)^3
+    return - dot(vert_i - vert_j, n_i) / norm(vert_i - vert_j)^3 / T(4π)
+end
+
+@inbounds function energy(poisson_sys::PoissonSystem{T}, φ::Vector{T}) where{T}
+
+    surfaces = poisson_sys.surfaces
+    charges = poisson_sys.charges
+    ϵ_m = poisson_sys.ϵ_medium
+    ϵ_c = poisson_sys.ϵ_charges
+    ϵ_s = poisson_sys.ϵ_surfaces
+
+    Nt_total = nt_total(poisson_sys)
+    E = zero(T) # total energy
+
+    for (i, q_i) in enumerate(charges)
+        for (j, q_j) in enumerate(charges)
+            (i == j) && continue # skip the self-interaction
+            E += q_i.q * q_j.q * Coulomb(q_i.r, q_j.r) / ϵ_c[i]
+        end
+    end
+
+    jl = 0
+    for (i, q_i) in enumerate(charges)
+        for (j, surface_j) in enumerate(surfaces)
+            for (l, tri_k) in enumerate(surface_j.tris)
+                jl += 1
+                γ_ij = T((ϵ_m - ϵ_s[j]) / ϵ_c[i])
+                E += q_i.q * γ_ij * φ[jl] * partial_ni_Coulomb(tri_k.r, q_i.r, tri_k.n) * tri_k.a
+            end
+        end
+    end
+
+
+    return E / 2
 end
 
 @inbounds function Poisson_A(poisson_sys::PoissonSystem{T}) where{T}
 
     surfaces = poisson_sys.surfaces
-    charges = poisson_sys.charges
     ϵ_m = poisson_sys.ϵ_medium
     ϵ_s = poisson_sys.ϵ_surfaces
 
@@ -27,7 +59,7 @@ end
                 for (l, tri_l) in enumerate(surface_j.tris)
                     (i == j && k == l) && continue # skip the self-interaction
                     jl = jl0 + l
-                    A[ik, jl] += α_ij * partial_ni_Coulomb(tri_k.r, tri_l.r, tri_k.n) * tri_k.a
+                    A[ik, jl] += - α_ij * partial_ni_Coulomb(tri_l.r, tri_k.r, tri_l.n) * tri_l.a
                 end
             end
             jl0 += nt(surface_j)
@@ -60,4 +92,11 @@ end
     end
 
     return b
+end
+
+function solve(sys::PoissonSystem{T}; kwargs...) where{T}
+    A = Poisson_A(sys)
+    b = Poisson_b(sys)
+    x, _ = gmres(A, b; kwargs...)
+    return x
 end

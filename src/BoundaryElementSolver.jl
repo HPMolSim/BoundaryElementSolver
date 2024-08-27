@@ -1,6 +1,6 @@
 module BoundaryElementSolver
 
-using LinearAlgebra, IterativeSolvers, StaticArrays, Krylov
+using LinearAlgebra, StaticArrays, Krylov
 using Plots
 
 export Model, Vertex, MeshedSurface, Triangle, PointCharge, PoissonSystem
@@ -8,6 +8,10 @@ export Model, Vertex, MeshedSurface, Triangle, PointCharge, PoissonSystem
 export model_from_artifact, load_model
 export sphere
 export Model2Surface, shift!
+
+# high level functions
+export solve, energy
+
 export display_model, display_surface, display_system
 
 
