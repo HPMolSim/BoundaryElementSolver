@@ -1,12 +1,12 @@
-function Coulomb(vert_i::SVector{3, T}, vert_j::SVector{3, T}) where{T}
+@inline function Coulomb(vert_i::SVector{3, T}, vert_j::SVector{3, T}) where{T}
     return one(T) / norm(vert_i - vert_j)
 end
 
-function partial_ni_Coulomb(vert_i::SVector{3, T}, vert_j::SVector{3, T}, n_i::SVector{3, T}) where{T}
+@inline function partial_ni_Coulomb(vert_i::SVector{3, T}, vert_j::SVector{3, T}, n_i::SVector{3, T}) where{T}
     return - dot(vert_i - vert_j, n_i) / norm(vert_i - vert_j)^3
 end
 
-function Poisson_A(poisson_sys::PoissonSystem{T}) where{T}
+@inbounds function Poisson_A(poisson_sys::PoissonSystem{T}) where{T}
 
     surfaces = poisson_sys.surfaces
     charges = poisson_sys.charges
@@ -23,9 +23,9 @@ function Poisson_A(poisson_sys::PoissonSystem{T}) where{T}
         for (j, surface_j) in enumerate(surfaces)
             α_ij = T(2 * (ϵ_m - ϵ_s[j]) / (ϵ_m + ϵ_s[i]))
             for (k, tri_k) in enumerate(surface_i.tris)
+                ik = ik0 + k
                 for (l, tri_l) in enumerate(surface_j.tris)
                     (i == j && k == l) && continue # skip the self-interaction
-                    ik = ik0 + k
                     jl = jl0 + l
                     A[ik, jl] += α_ij * partial_ni_Coulomb(tri_k.r, tri_l.r, tri_k.n) * tri_k.a
                 end
@@ -38,7 +38,7 @@ function Poisson_A(poisson_sys::PoissonSystem{T}) where{T}
     return A
 end
 
-function Poisson_b(poisson_sys::PoissonSystem{T}) where{T}
+@inbounds function Poisson_b(poisson_sys::PoissonSystem{T}) where{T}
 
     surfaces = poisson_sys.surfaces
     charges = poisson_sys.charges

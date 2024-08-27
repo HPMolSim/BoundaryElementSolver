@@ -1,6 +1,6 @@
 module BoundaryElementSolver
 
-using LinearAlgebra, IterativeSolvers, StaticArrays, Artifacts, Krylov
+using LinearAlgebra, IterativeSolvers, StaticArrays, Krylov
 using Plots
 
 export Model, Vertex, MeshedSurface, Triangle, PointCharge, PoissonSystem

@@ -43,13 +43,3 @@ function load_model(path_vert::String, path_face::String; T::DataType = Float64)
 
     return vert_dat, face_dat
 end
-
-function model_from_artifact(artifact_name::String, name::String; T::DataType = Float64)
-    path_artifact = @artifact_str artifact_name
-    path_vert = joinpath(path_artifact, name * "vert.dat")
-    path_face = joinpath(path_artifact, name * "face.dat")
-
-    verts, faces = load_model(path_vert, path_face; T)
-
-    return Model{T}(verts, faces)
-end
