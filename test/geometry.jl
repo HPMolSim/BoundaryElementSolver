@@ -1,10 +1,9 @@
 @testset "norm of sphere" begin
-    for dt in [Float32, Float64]
-        model = sphere(2, T=dt)
-        obj = Model2Object(model)
+    for T in [Float32, Float64]
+        model = sphere(2, r = T(1.0))
+        surf = Model2Surface(model)
 
-        for i in 1:length(obj.tris)
-            tri = obj.tris[i]
+        for tri in surf.tris
             @test norm(tri.n) ≈ 1.0
             # test the direct of the norms here
         end

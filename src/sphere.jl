@@ -1,4 +1,4 @@
-function icosahedron(;T::DataType=Float64)
+function icosahedron(r::T) where{T}
 
     m = T(sqrt(50.0 - 10√5) / 10.0)
     n = T(sqrt(50.0 + 10√5) / 10.0)
@@ -9,15 +9,15 @@ function icosahedron(;T::DataType=Float64)
     verts = Vector{Tuple{T, T, T}}()
     for i in [+1, -1]
         for j in [+1, -1]
-            push!(verts, (i * m, 0.0, j * n))
-            push!(verts, (0.0, j * n, i * m))
-            push!(verts, (j * n, i * m, 0.0))
+            push!(verts, (r * i * m, zero(T), r * j * n))
+            push!(verts, (zero(T), r * j * n, r * i * m))
+            push!(verts, (r * j * n, r * i * m, zero(T)))
         end
     end
 
     # the faces of a regular icosahedron
     faces = Vector{Tuple{Int, Int, Int}}()
-    r0 = T(1.0514622242382672)
+    r0 = T(1.0514622242382672) * r
     for i in 1:12
         for j in i + 1:12
             for k in j + 1:12
@@ -29,19 +29,19 @@ function icosahedron(;T::DataType=Float64)
         end
     end
 
-    return verts, faces, get_edges(faces)
+    return verts, faces
 end
 
-function mesh_sphere(verts::Vector{Tuple{T, T, T}}, faces::Vector{Tuple{Int, Int, Int}}, edges::Vector{Tuple{Int, Int}}) where{T}
+function mesh_sphere(verts::Vector{Tuple{T, T, T}}, faces::Vector{Tuple{Int, Int, Int}}, r::T) where{T}
     verts2 = copy(verts)
 
     faces2 = Vector{Tuple{Int, Int, Int}}()
 
     for face in faces
         a, b, c = face
-        v1 = (verts[a] .+ verts[b]) ./ norm(verts[a] .+ verts[b])
-        v2 = (verts[b] .+ verts[c]) ./ norm(verts[b] .+ verts[c])
-        v3 = (verts[c] .+ verts[a]) ./ norm(verts[c] .+ verts[a])
+        v1 = (verts[a] .+ verts[b]) ./ norm(verts[a] .+ verts[b]) .* r
+        v2 = (verts[b] .+ verts[c]) ./ norm(verts[b] .+ verts[c]) .* r
+        v3 = (verts[c] .+ verts[a]) ./ norm(verts[c] .+ verts[a]) .* r
 
         d = add_vert!(verts2, v1)
         e = add_vert!(verts2, v2)
@@ -53,15 +53,26 @@ function mesh_sphere(verts::Vector{Tuple{T, T, T}}, faces::Vector{Tuple{Int, Int
         push!(faces2, (d, e, f))
     end
 
-    edges2 = get_edges(faces2)
-
-    return verts2, faces2, edges2
+    return verts2, faces2
 end
 
-function sphere(n::Int; T::DataType=Float64)
-    verts, faces, edges = icosahedron(T=T)
+"""
+    sphere(n::Int; r::T = 1.0) where{T}
+
+Constructs a sphere model with the specified number of subdivisions.
+
+# Arguments
+- `n::Int`: The number of subdivisions to perform on the initial icosahedron, number of faces is `20 * 4^n`.
+- `r::T = 1.0`: The radius of the sphere. Default is `1.0`.
+
+# Returns
+A `Model` object representing the sphere.
+
+"""
+function sphere(n::Int; r::T = 1.0) where{T}
+    verts, faces = icosahedron(r)
     for i in 1:n - 1
-        verts, faces, edges = mesh_sphere(verts, faces, edges)
+        verts, faces = mesh_sphere(verts, faces, r)
     end
 
     Verteices = Vector{Vertex{T}}()

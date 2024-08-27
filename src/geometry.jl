@@ -5,23 +5,18 @@
     return T(norm(normal) / 2)
 end
 
-function Model2Object(model::Model{T}; center::NTuple{3, T} = (zero(T), zero(T), zero(T)), angle::NTuple{3, T} = (zero(T), zero(T), zero(T)), scale::T = one(T), ϵ::T = one(T)) where{T}
+function Model2Surface(model::Model{T}; center::NTuple{3, T} = (zero(T), zero(T), zero(T))) where{T}
     verts = model.verts
     faces = model.faces
     tris = Vector{Triangle{T}}()
     for face in faces
         a, b, c = face
-        r = (verts[a].p + verts[b].p + verts[c].p) .* scale / 3
-        n = (verts[a].n + verts[b].n + verts[c].n) ./ 3
-        n = n ./ (norm(n))
-        a = tri_area(verts[a].p, verts[b].p, verts[c].p)
-        push!(tris, Triangle(r, n, a))
+        push!(tris, Triangle(verts[a], verts[b], verts[c]))
     end
 
-    center = SVector{3, T}(center)
-    angle = SVector{3, T}(angle)
+    surf = MeshedSurface(tris)
 
-    return MeshedObject(tris, center, angle, ϵ)
+    return shift!(surf, center...)
 end
 
 function get_edges(faces::Vector)
@@ -44,4 +39,11 @@ function add_vert!(verts, new_vert)
         push!(verts, new_vert)
         return length(verts)
     end
+end
+
+function shift!(m::MeshedSurface{T}, x::T, y::T, z::T) where{T}
+    for tri in m.tris
+        tri.r = tri.r .+ SVector{3, T}(x, y, z)
+    end
+    return m
 end
