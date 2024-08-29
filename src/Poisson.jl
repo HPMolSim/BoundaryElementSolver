@@ -6,7 +6,7 @@ end
     return - dot(vert_i - vert_j, n_i) / norm(vert_i - vert_j)^3 / T(4π)
 end
 
-@inbounds function energy(poisson_sys::PoissonSystem{T}, φ::Vector{T}) where{T}
+@inbounds function energy(poisson_sys::PoissonSystem{T}, ϕ::Vector{T}) where{T}
 
     surfaces = poisson_sys.surfaces
     charges = poisson_sys.charges
@@ -24,13 +24,13 @@ end
         end
     end
 
-    jl = 0
     for (i, q_i) in enumerate(charges)
+        jl = 0
         for (j, surface_j) in enumerate(surfaces)
             for (l, tri_k) in enumerate(surface_j.tris)
                 jl += 1
                 γ_ij = T((ϵ_m - ϵ_s[j]) / ϵ_c[i])
-                E += q_i.q * γ_ij * φ[jl] * partial_ni_Coulomb(tri_k.r, q_i.r, tri_k.n) * tri_k.a
+                E -= q_i.q * γ_ij * ϕ[jl] * partial_ni_Coulomb(tri_k.r, q_i.r, tri_k.n) * tri_k.a
             end
         end
     end
@@ -99,4 +99,25 @@ function solve(sys::PoissonSystem{T}; kwargs...) where{T}
     b = Poisson_b(sys)
     x, _ = gmres(A, b; kwargs...)
     return x
+end
+
+function surface_potential(sys::PoissonSystem{T}, ϕ::Vector{T}) where{T}
+
+    surfaces = sys.surfaces
+    Nt_total = nt_total(sys)
+    potentials = zeros(T, Nt_total, 4)
+
+    ik = 0
+    for (i, surface) in enumerate(surfaces)
+        for (k, tri) in enumerate(surface.tris)
+            ik += 1
+            x, y, z = tri.r
+            potentials[ik, 1] = x
+            potentials[ik, 2] = y
+            potentials[ik, 3] = z
+            potentials[ik, 4] = ϕ[ik]
+        end
+    end
+
+    return potentials
 end

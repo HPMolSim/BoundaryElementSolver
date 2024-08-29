@@ -1,7 +1,7 @@
 module BoundaryElementSolver
 
-using LinearAlgebra, StaticArrays, Krylov
-using Plots
+using LinearAlgebra, StaticArrays, Krylov, GaussQuadrature
+using GLMakie
 
 export Model, Vertex, MeshedSurface, Triangle, PointCharge, PoissonSystem
 
@@ -10,9 +10,9 @@ export sphere
 export Model2Surface, shift!
 
 # high level functions
-export solve, energy
+export solve, energy, surface_potential
 
-export display_model, display_surface, display_system
+export display_model, display_surface, display_system, display_potential
 
 
 include("types.jl")
@@ -23,6 +23,8 @@ include("sphere.jl")
 include("Poisson.jl")
 include("linear_solver.jl")
 
-include("display.jl")
+include("utils/bisphere.jl")
+
+include("utils/display.jl")
 
 end
