@@ -29,16 +29,17 @@ end
         end
     end
 
+    jl0 = 0
     for (i, q_i) in enumerate(charges)
-        jl = 0
         for (j, surface_j) in enumerate(surfaces)
-            t = zero(TE)
-            for (l, tri_k) in enumerate(surface_j.tris)
-                jl += 1
+            t = tmapreduce(+, 1:nt(surface_j); ntasks = nthreads()) do l
+                tri_k = surface_j.tris[l]
+                jl = jl0 + l
                 γ_ij = TE((ϵ_m - ϵ_s[j]) / ϵ_c[i])
-                t += q_i.q * γ_ij * ϕ[jl] * partial_nj_Coulomb(q_i.r, tri_k.r, tri_k.n) * tri_k.a
+                q_i.q * γ_ij * ϕ[jl] * partial_nj_Coulomb(q_i.r, tri_k.r, tri_k.n) * tri_k.a
             end
             E_ps += t
+            jl0 += nt(surface_j)
         end
     end
 
@@ -64,10 +65,11 @@ end
             α_ij = TE(2 * (ϵ_m - ϵ_s[j]) / (ϵ_m + ϵ_s[i]))
             for (k, tri_k) in enumerate(surface_i.tris)
                 ik = ik0 + k
-                for (l, tri_l) in enumerate(surface_j.tris)
-                    (i == j && k == l) && continue # skip the self-interaction
-                    jl = jl0 + l
-                    A[ik, jl] -= α_ij * partial_nj_Coulomb(tri_k.r, tri_l.r, tri_l.n) * tri_l.a
+                @tasks for l in 1:nt(surface_j)
+                    if !(i == j && k == l)
+                        tri_l = surface_j.tris[l]
+                        A[ik, jl0 + l] = - α_ij * partial_nj_Coulomb(tri_k.r, tri_l.r, tri_l.n) * tri_l.a
+                    end
                 end
             end
             jl0 += nt(surface_j)
@@ -88,15 +90,17 @@ end
     Nt_total = nt_total(poisson_sys) # total number of triangles
     b = zeros(TE, Nt_total)
 
-    ik = 0
-    for (i, surface) in enumerate(surfaces)
-        for (k, tri) in enumerate(surface.tris)
-            ik += 1
+    ik0 = 0
+    for surface in surfaces
+        @tasks for k in 1:nt(surface)
+            tri = surface.tris[k]
+            ik = ik0 + k
             for (j, charge) in enumerate(charges)
                 βi  = TE(2 / (ϵ_m + ϵ_c[j]))
                 b[ik] += βi * charge.q * Coulomb(tri.r, charge.r)
             end
         end
+        ik0 += nt(surface)
     end
 
     return b

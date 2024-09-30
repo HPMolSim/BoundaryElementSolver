@@ -1,6 +1,8 @@
 module BoundaryElementSolver
 
 using LinearAlgebra, StaticArrays, Krylov, GaussQuadrature
+using OhMyThreads: tmapreduce, @tasks
+using Base.Threads: nthreads
 using CairoMakie
 
 export Model, Vertex, MeshedSurface, Triangle, PointCharge, PoissonSystem
