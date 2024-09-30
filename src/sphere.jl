@@ -82,3 +82,27 @@ function sphere(n::Int; r::T = 1.0) where{T}
 
     return Model(Verteices, SVector{3, Int}.(faces))
 end
+
+function sphere_surf(n::Int; r::T = 1.0, center::NTuple{3, T} = (0.0, 0.0, 0.0)) where{T}
+    verts, faces = icosahedron(r)
+    for i in 1:n - 1
+        verts, faces = mesh_sphere(verts, faces, r)
+    end
+
+    n_verts = Vector{Vertex{T}}()
+    for vert in verts
+        push!(n_verts, Vertex(vert, vert))
+    end
+
+    tris = Vector{Triangle{T}}()
+    for face in faces
+        a, b, c = face
+        tri = Triangle(n_verts[a], n_verts[b], n_verts[c])
+        tri.r = tri.r ./ norm(tri.r) .* r
+        push!(tris, tri)
+    end
+
+    surf = MeshedSurface(tris)
+
+    return shift!(surf, center...)
+end

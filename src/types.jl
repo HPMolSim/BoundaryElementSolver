@@ -60,35 +60,37 @@ end
 Base.show(io::IO, v::PointCharge{T}) where{T} = print(io, "PointCharge{$T}, position: $(v.r), charge: $(v.q)")
 Base.copy(p::PointCharge{T}) where{T} = PointCharge(copy(p.r), p.q)
 
-struct PoissonSystem{T}
-    ϵ_medium::T
+# T for the type of the positions
+# TE for eps, can be complex numbers
+struct PoissonSystem{T, TE}
+    ϵ_medium::TE
 
-    ϵ_surfaces::Vector{T}
+    ϵ_surfaces::Vector{TE}
     surfaces::Vector{MeshedSurface{T}}
 
-    ϵ_charges::Vector{T}
+    ϵ_charges::Vector{TE}
     charges::Vector{PointCharge{T}}
 
-    function PoissonSystem(ϵ_medium::T, ϵ_surfaces::Vector{T}, surfaces::Vector{MeshedSurface{T}}, ϵ_charges::Vector{T}, charges::Vector{PointCharge{T}}) where{T}
+    function PoissonSystem(ϵ_medium::TE, ϵ_surfaces::Vector{TE}, surfaces::Vector{MeshedSurface{T}}, ϵ_charges::Vector{TE}, charges::Vector{PointCharge{T}}) where{T, TE}
         if length(ϵ_surfaces) != length(surfaces)
             throw(ArgumentError("length(ϵ_surfaces) != length(surfaces)"))
         end
         if length(ϵ_charges) != length(charges)
             throw(ArgumentError("length(ϵ_charges) != length(charges)"))
         end
-        new{T}(ϵ_medium, ϵ_surfaces, surfaces, ϵ_charges, charges)
+        new{T, TE}(ϵ_medium, ϵ_surfaces, surfaces, ϵ_charges, charges)
     end
 end
 
-Base.show(io::IO, v::PoissonSystem{T}) where{T} = print(io, "PoissonSystem{$T}, ns: $(ns(v)), nc: $(nc(v))")
-Base.copy(p::PoissonSystem{T}) where{T} = PoissonSystem(p.ϵ_medium, copy(p.ϵ_surfaces), copy(p.surfaces), copy(p.ϵ_charges), copy(p.charges))
+Base.show(io::IO, v::PoissonSystem{T, TE}) where{T, TE} = print(io, "PoissonSystem{$T, $TE}, ns: $(ns(v)), nc: $(nc(v))")
+Base.copy(p::PoissonSystem{T, TE}) where{T, TE} = PoissonSystem(p.ϵ_medium, copy(p.ϵ_surfaces), copy(p.surfaces), copy(p.ϵ_charges), copy(p.charges))
 ns(poisson_sys::PoissonSystem) = length(poisson_sys.surfaces)
 nc(poisson_sys::PoissonSystem) = length(poisson_sys.charges)
 nt_total(poisson_sys::PoissonSystem) = foldl((x, y) -> x + nt(y), poisson_sys.surfaces, init = 0)
 
-struct PoissonSolver{T}
-    A::AbstractArray{T, 2}
-    b::AbstractArray{T, 1}
-    Preconditioner::AbstractArray{T, 2}
+struct PoissonSolver{T, TE, TP}
+    A::AbstractArray{TE, 2}
+    b::AbstractArray{TE, 1}
+    Preconditioner::AbstractArray{TP, 2}
     max_error::T
 end

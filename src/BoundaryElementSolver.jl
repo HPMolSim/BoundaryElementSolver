@@ -6,7 +6,7 @@ using GLMakie
 export Model, Vertex, MeshedSurface, Triangle, PointCharge, PoissonSystem
 
 export model_from_artifact, load_model
-export sphere
+export sphere, sphere_surf
 export Model2Surface, shift!
 
 # high level functions
@@ -21,7 +21,6 @@ include("geometry.jl")
 include("sphere.jl")
 
 include("Poisson.jl")
-include("linear_solver.jl")
 
 include("utils/bisphere.jl")
 

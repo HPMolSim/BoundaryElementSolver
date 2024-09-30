@@ -6,7 +6,11 @@ end
     return - dot(vert_i - vert_j, n_i) / norm(vert_i - vert_j)^3 / T(4π)
 end
 
-@inbounds function energy(poisson_sys::PoissonSystem{T}, ϕ::Vector{T}) where{T}
+@inline function partial_nj_Coulomb(vert_i::SVector{3, T}, vert_j::SVector{3, T}, n_j::SVector{3, T}) where{T}
+    return dot(vert_i - vert_j, n_j) / norm(vert_i - vert_j)^3 / T(4π)
+end
+
+@inbounds function energy(poisson_sys::PoissonSystem{T, TE}, ϕ::Vector{TE}) where{T, TE}
 
     surfaces = poisson_sys.surfaces
     charges = poisson_sys.charges
@@ -15,51 +19,56 @@ end
     ϵ_s = poisson_sys.ϵ_surfaces
 
     Nt_total = nt_total(poisson_sys)
-    E = zero(T) # total energy
+    E_pp = zero(TE) # energy between charges and charges
+    E_ps = zero(TE) # energy between charges and surfaces
 
     for (i, q_i) in enumerate(charges)
         for (j, q_j) in enumerate(charges)
             (i == j) && continue # skip the self-interaction
-            E += q_i.q * q_j.q * Coulomb(q_i.r, q_j.r) / ϵ_c[i]
+            E_pp += q_i.q * q_j.q * Coulomb(q_i.r, q_j.r) / ϵ_c[i]
         end
     end
 
     for (i, q_i) in enumerate(charges)
         jl = 0
         for (j, surface_j) in enumerate(surfaces)
+            t = zero(TE)
             for (l, tri_k) in enumerate(surface_j.tris)
                 jl += 1
-                γ_ij = T((ϵ_m - ϵ_s[j]) / ϵ_c[i])
-                E -= q_i.q * γ_ij * ϕ[jl] * partial_ni_Coulomb(tri_k.r, q_i.r, tri_k.n) * tri_k.a
+                γ_ij = TE((ϵ_m - ϵ_s[j]) / ϵ_c[i])
+                t += q_i.q * γ_ij * ϕ[jl] * partial_nj_Coulomb(q_i.r, tri_k.r, tri_k.n) * tri_k.a
             end
+            @show i, j, t / 2
+            E_ps += t
         end
     end
 
+    @debug "E_pp: $(E_pp / 2), E_ps: $(E_ps / 2)"
 
-    return E / 2
+    return (E_pp + E_ps) / 2
 end
 
-@inbounds function Poisson_A(poisson_sys::PoissonSystem{T}) where{T}
+@inbounds function Poisson_A(poisson_sys::PoissonSystem{T, TE}) where{T, TE}
 
     surfaces = poisson_sys.surfaces
     ϵ_m = poisson_sys.ϵ_medium
     ϵ_s = poisson_sys.ϵ_surfaces
 
     Nt_total = nt_total(poisson_sys)
-    A = zeros(T, Nt_total, Nt_total) + I
+    A = zeros(TE, Nt_total, Nt_total) + I
 
     ik0 = 0
 
     for (i, surface_i) in enumerate(surfaces)
         jl0 = 0
         for (j, surface_j) in enumerate(surfaces)
-            α_ij = T(2 * (ϵ_m - ϵ_s[j]) / (ϵ_m + ϵ_s[i]))
+            α_ij = TE(2 * (ϵ_m - ϵ_s[j]) / (ϵ_m + ϵ_s[i]))
             for (k, tri_k) in enumerate(surface_i.tris)
                 ik = ik0 + k
                 for (l, tri_l) in enumerate(surface_j.tris)
                     (i == j && k == l) && continue # skip the self-interaction
                     jl = jl0 + l
-                    A[ik, jl] += - α_ij * partial_ni_Coulomb(tri_l.r, tri_k.r, tri_l.n) * tri_l.a
+                    A[ik, jl] -= α_ij * partial_nj_Coulomb(tri_k.r, tri_l.r, tri_l.n) * tri_l.a
                 end
             end
             jl0 += nt(surface_j)
@@ -70,7 +79,7 @@ end
     return A
 end
 
-@inbounds function Poisson_b(poisson_sys::PoissonSystem{T}) where{T}
+@inbounds function Poisson_b(poisson_sys::PoissonSystem{T, TE}) where{T, TE}
 
     surfaces = poisson_sys.surfaces
     charges = poisson_sys.charges
@@ -78,14 +87,14 @@ end
     ϵ_c = poisson_sys.ϵ_charges
 
     Nt_total = nt_total(poisson_sys) # total number of triangles
-    b = zeros(T, Nt_total)
+    b = zeros(TE, Nt_total)
 
     ik = 0
     for (i, surface) in enumerate(surfaces)
         for (k, tri) in enumerate(surface.tris)
             ik += 1
             for (j, charge) in enumerate(charges)
-                βi  = T(2 / (ϵ_m + ϵ_c[j]))
+                βi  = TE(2 / (ϵ_m + ϵ_c[j]))
                 b[ik] += βi * charge.q * Coulomb(tri.r, charge.r)
             end
         end
@@ -94,18 +103,18 @@ end
     return b
 end
 
-function solve(sys::PoissonSystem{T}; kwargs...) where{T}
+function solve(sys::PoissonSystem{T, TE}; kwargs...) where{T, TE}
     A = Poisson_A(sys)
     b = Poisson_b(sys)
     x, _ = gmres(A, b; kwargs...)
     return x
 end
 
-function surface_potential(sys::PoissonSystem{T}, ϕ::Vector{T}) where{T}
+function surface_potential(sys::PoissonSystem{T, TE}, ϕ::Vector{T}) where{T, TE}
 
     surfaces = sys.surfaces
     Nt_total = nt_total(sys)
-    potentials = zeros(T, Nt_total, 4)
+    potentials = zeros(TE, Nt_total, 4)
 
     ik = 0
     for (i, surface) in enumerate(surfaces)

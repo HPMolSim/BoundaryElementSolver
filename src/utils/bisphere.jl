@@ -40,7 +40,7 @@ function bisphere_energy(bisys::BiSphereSystem)
     dy = 0.0 - 0.0
     dz = z_1 - z_2
     dr = sqrt(dx^2 + dy^2 + dz^2)
-    energy += q_1 * q_2 / dr / (4π * eps_0)
+    # energy += q_1 * q_2 / dr / (4π * eps_0)
 
     src = zeros(Float64, 2, 4)  # 2 charges, each has its x,y,z coordinates and charge q
     src[1, :] = [0.0, 0.0, z_1, q_1]
@@ -87,19 +87,16 @@ function bisphere_phi(x, y, z, bisys::BiSphereSystem)
         dy = y - images[j, 2]
         dz = z - images[j, 3]
         dr = sqrt(dx^2 + dy^2 + dz^2)
-        if dr > r_1
-            phi += images[j, 4] / dr
-        end
-    end
 
-    for j in 1:size(images, 1)
-        dx = x - images[j, 1]
-        dy = y - images[j, 2]
-        dz = z - images[j, 3]
-        dr = sqrt(dx^2 + dy^2 + dz^2)
-        if dr > r_2
-            phi += images[j, 4] / dr
-        end
+        # check if the point is outside the spheres
+        # dr_1 = sqrt(x^2 + y^2 + (z - z_1)^2)
+        # dr_2 = sqrt(x^2 + y^2 + (z - z_2)^2)
+
+        # if ((dr ≥ r_1) || (dr ≈ r_1)) && ((dr ≥ r_2) || (dr ≈ r_2))
+        #     phi += images[j, 4] / dr
+        # end
+
+        phi += images[j, 4] / dr
     end
 
     return phi / (4π * eps_0)
