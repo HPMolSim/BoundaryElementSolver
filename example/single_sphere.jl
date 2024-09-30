@@ -1,5 +1,5 @@
 using BoundaryElementSolver
-using GLMakie, LaTeXStrings
+using CairoMakie, LaTeXStrings
 
 # consider a single sphere with r = 1.0, with a charge of 1.0 at the center
 # ϵ_0 = 80.0 and ϵ_1 = 2.0
@@ -40,4 +40,4 @@ begin
 end
 fig
 
-save("example/single_sphere.png", fig)
+save("single_sphere.png", fig)

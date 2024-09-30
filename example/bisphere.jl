@@ -1,5 +1,5 @@
 using BoundaryElementSolver
-using GLMakie, LaTeXStrings
+using CairoMakie, LaTeXStrings
 using LinearAlgebra
 
 # consider two spheres, one at (0, 0, 2), one at (0, 0, -2), both with r = 1.0

@@ -38,7 +38,6 @@ end
                 γ_ij = TE((ϵ_m - ϵ_s[j]) / ϵ_c[i])
                 t += q_i.q * γ_ij * ϕ[jl] * partial_nj_Coulomb(q_i.r, tri_k.r, tri_k.n) * tri_k.a
             end
-            @show i, j, t / 2
             E_ps += t
         end
     end

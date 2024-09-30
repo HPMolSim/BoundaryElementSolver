@@ -1,7 +1,7 @@
 module BoundaryElementSolver
 
 using LinearAlgebra, StaticArrays, Krylov, GaussQuadrature
-using GLMakie
+using CairoMakie
 
 export Model, Vertex, MeshedSurface, Triangle, PointCharge, PoissonSystem
 
