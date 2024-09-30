@@ -21,7 +21,7 @@ E = energy(poisson_sys, ϕ)
 num_tris = Vector{Int}()
 errors = Vector{Float64}()
 # different number of triangles
-for n in 1:6
+for n in 2:7
     surf = sphere_surf(n)
     poisson_sys = PoissonSystem(ϵ_0, [ϵ_1], [surf], [ϵ_1], [point_charge])
     φ = solve(poisson_sys)
