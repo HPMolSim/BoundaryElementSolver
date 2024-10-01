@@ -11,5 +11,9 @@
     ϕ = solve(poisson_sys)
     E = energy(poisson_sys, ϕ)
 
+    ϕ_ss = solve_ss(poisson_sys)
+    E_ss = energy(poisson_sys, ϕ_ss)
+
     @test isapprox(E, E_exact, atol = 1e-3)
+    @test isapprox(E_ss, E_exact, atol = 1e-3)
 end

@@ -80,6 +80,49 @@ end
     return A
 end
 
+@inbounds function Poisson_A_ss(poisson_sys::PoissonSystem{T, TE}) where{T, TE}
+
+    surfaces = poisson_sys.surfaces
+    ϵ_m = poisson_sys.ϵ_medium
+    ϵ_s = poisson_sys.ϵ_surfaces
+
+    Nt_total = nt_total(poisson_sys)
+    A = zeros(TE, Nt_total, Nt_total)
+    
+    ik0 = 0
+    for (i, surface_i) in enumerate(surfaces)
+        α_ii = TE(2 * (ϵ_m - ϵ_s[i]) / (ϵ_m + ϵ_s[i]))
+        for k in 1:nt(surface_i)
+            A[ik0 + k, ik0 + k] = 1 + α_ii / 2
+        end
+        ik0 += nt(surface_i)
+    end
+
+    ik0 = 0
+    for (i, surface_i) in enumerate(surfaces)
+        jl0 = 0
+        for (j, surface_j) in enumerate(surfaces)
+            α_ij = TE(2 * (ϵ_m - ϵ_s[j]) / (ϵ_m + ϵ_s[i]))
+            @tasks for k in 1:nt(surface_i)
+                tri_k = surface_i.tris[k]
+                ik = ik0 + k
+                for l in 1:nt(surface_j)
+                    if !(i == j && k == l)
+                        tri_l = surface_j.tris[l]
+                        t = - α_ij * partial_nj_Coulomb(tri_k.r, tri_l.r, tri_l.n) * tri_l.a
+                        A[ik, jl0 + l] += t
+                        (i == j) && (A[ik, ik] -= t)
+                    end
+                end
+            end
+            jl0 += nt(surface_j)
+        end
+        ik0 += nt(surface_i)
+    end
+
+    return A
+end
+
 @inbounds function Poisson_b(poisson_sys::PoissonSystem{T, TE}) where{T, TE}
 
     surfaces = poisson_sys.surfaces
@@ -108,6 +151,13 @@ end
 
 function solve(sys::PoissonSystem{T, TE}; kwargs...) where{T, TE}
     A = Poisson_A(sys)
+    b = Poisson_b(sys)
+    x, _ = gmres(A, b; kwargs...)
+    return x
+end
+
+function solve_ss(sys::PoissonSystem{T, TE}; kwargs...) where{T, TE}
+    A = Poisson_A_ss(sys)
     b = Poisson_b(sys)
     x, _ = gmres(A, b; kwargs...)
     return x

@@ -7,7 +7,7 @@ using CSV, DataFrames
 # the energy of the system is given by (80 - 2) / 2 * 1.0^2 / 4π / 2 / 80.0
 function main()
 
-    CSV.write("single_sphere.csv", DataFrame(num_tris = Int[], E = Float64[], errors = Float64[]))
+    CSV.write("single_sphere.csv", DataFrame(num_tris = Int[], E_exact = Float64[], E_cc = Float64[], E_ss = Float64[]))
 
     ϵ_0 = 80.0
     ϵ_1 = 2.0
@@ -16,18 +16,20 @@ function main()
     num_tris = Vector{Int}()
     errors = Vector{Float64}()
     # different number of triangles
-    E_array = Vector{Float64}()
     for n in 2:7
         point_charge = PointCharge(0.0, 0.0, 0.0, 1.0)
         surf = sphere_surf(n)
         poisson_sys = PoissonSystem(ϵ_0, [ϵ_1], [surf], [ϵ_1], [point_charge])
-        φ = solve(poisson_sys)
-        E = energy(poisson_sys, φ)
-        push!(E_array, E)
-        push!(errors, abs(E - E_exact) / abs(E_exact))
-        push!(num_tris, length(surf.tris))
-        println("num_tris = $(length(surf.tris)), E = $E, error = $(abs(E - E_exact)), relative error = $(abs(E - E_exact) / E_exact)")
-        CSV.write("single_sphere.csv", DataFrame(num_tris = num_tris, E = E, errors = errors), append = true)
+        ϕ_cc = solve(poisson_sys)
+        E_cc = energy(poisson_sys, ϕ_cc)
+
+        ϕ_ss = solve_ss(poisson_sys)
+        E_ss = energy(poisson_sys, ϕ_ss)
+
+        println("num_tris = $(length(surf.tris)), E_cc = $E_cc, relative error cc = $(abs(E_cc - E_exact) / abs(E_exact)), E_ss = $(E_ss), relative error ss = $(abs(E_ss - E_exact) / abs(E_exact))")
+
+        df = DataFrame(num_tris = length(surf.tris), E_exact = E_exact, E_cc = E_cc, E_ss = E_ss)
+        CSV.write("single_sphere.csv", df, append = true)
     end
 end
 
