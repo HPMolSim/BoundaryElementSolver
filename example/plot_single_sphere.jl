@@ -28,9 +28,9 @@ begin
     scatterlines!(ax, num_tris[3:end], abs.(E_2 .- E_exact) ./ abs(E_exact), label = "CC-2", markersize = ms, linestyle = :dash, marker = marker_style[3], color = colors[3])
 
 
-    lines!(ax, num_tris[end - 1:end], num_tris[end - 1:end].^(-0.5) ./ 1, color = :black)
+    lines!(ax, num_tris[end - 1:end], num_tris[end - 1:end].^(-0.5) ./ 1.5, color = :black)
     lines!(ax, num_tris[end - 1:end], num_tris[end - 1:end].^(-1) * 10, color = :black)
-    lines!(ax, num_tris[end - 1:end], num_tris[end - 1:end].^(-1.5) * 50, color = :black)
+    lines!(ax, num_tris[end - 1:end], num_tris[end - 1:end].^(-1.5) * 40, color = :black)
 
     text!(ax, (1e5, 1e-2), text = L"N^{-0.5}", color = :black, align = (:right, :top), fontsize = fs)
     text!(ax, (1e5, 10^(-3.3)), text = L"N^{-1}", color = :black, align = (:right, :top), fontsize = fs)
