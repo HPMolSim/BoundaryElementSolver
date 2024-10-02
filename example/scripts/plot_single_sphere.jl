@@ -1,7 +1,7 @@
 using CairoMakie, LaTeXStrings
 using CSV, DataFrames
 
-df = CSV.read("single_sphere.csv", DataFrame)
+df = CSV.read("data/single_sphere.csv", DataFrame)
 
 E_exact = df.E_exact[1]
 num_tris = df.num_tris

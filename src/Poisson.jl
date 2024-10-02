@@ -149,8 +149,8 @@ end
     return b
 end
 
-function solve(sys::PoissonSystem{T, TE}; kwargs...) where{T, TE}
-    A = Poisson_A(sys)
+function solve(sys::PoissonSystem{T, TE}; ss::Bool=false, kwargs...) where{T, TE}
+    A = ss ? Poisson_A_ss(sys) : Poisson_A(sys)
     b = Poisson_b(sys)
     x, _ = gmres(A, b; kwargs...)
     return x

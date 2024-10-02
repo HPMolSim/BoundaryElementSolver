@@ -43,9 +43,13 @@ function mesh_sphere(verts::Vector{Tuple{T, T, T}}, faces::Vector{Tuple{Int, Int
         v2 = (verts[b] .+ verts[c]) ./ norm(verts[b] .+ verts[c]) .* r
         v3 = (verts[c] .+ verts[a]) ./ norm(verts[c] .+ verts[a]) .* r
 
-        d = add_vert!(verts2, v1)
-        e = add_vert!(verts2, v2)
-        f = add_vert!(verts2, v3)
+        push!(verts2, v1)
+        push!(verts2, v2)
+        push!(verts2, v3)
+
+        d = length(verts2) - 2
+        e = length(verts2) - 1
+        f = length(verts2)
 
         push!(faces2, (a, d, f))
         push!(faces2, (b, e, d))
