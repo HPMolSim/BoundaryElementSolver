@@ -37,7 +37,7 @@ begin
     text!(ax, (1e5, 1e-5), text = L"N^{-1.5}", color = :black, align = (:right, :top), fontsize = fs)
 
     axislegend(ax, position = :lb)
-    save("single_sphere_cc.png", fig)
+    save("figs/single_sphere_cc.png", fig)
 end
 fig
 
@@ -64,7 +64,7 @@ begin
     ylims!(ax, 1e-13, 1)
 
     axislegend(ax, position = :lb)
-    save("single_sphere_ss.png", fig)
+    save("figs/single_sphere_ss.png", fig)
 end
 
 fig

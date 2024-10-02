@@ -22,15 +22,15 @@ end
     E_pp = zero(TE) # energy between charges and charges
     E_ps = zero(TE) # energy between charges and surfaces
 
-    for (i, q_i) in enumerate(charges)
-        for (j, q_j) in enumerate(charges)
-            (i == j) && continue # skip the self-interaction
-            E_pp += q_i.q * q_j.q * Coulomb(q_i.r, q_j.r) / ϵ_c[i]
-        end
-    end
+    # for (i, q_i) in enumerate(charges)
+    #     for (j, q_j) in enumerate(charges)
+    #         (i == j) && continue # skip the self-interaction
+    #         E_pp += q_i.q * q_j.q * Coulomb(q_i.r, q_j.r) / ϵ_c[i]
+    #     end
+    # end
 
-    jl0 = 0
     for (i, q_i) in enumerate(charges)
+        jl0 = 0
         for (j, surface_j) in enumerate(surfaces)
             t = tmapreduce(+, 1:nt(surface_j); ntasks = nthreads()) do l
                 tri_k = surface_j.tris[l]

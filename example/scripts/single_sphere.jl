@@ -7,7 +7,7 @@ using CSV, DataFrames
 # the energy of the system is given by (80 - 2) / 2 * 1.0^2 / 4π / 2 / 80.0
 function main()
 
-    CSV.write("single_sphere.csv", DataFrame(num_tris = Int[], E_exact = Float64[], E_cc = Float64[], E_ss = Float64[]))
+    CSV.write("data/single_sphere.csv", DataFrame(num_tris = Int[], E_exact = Float64[], E_cc = Float64[], E_ss = Float64[]))
 
     ϵ_0 = 80.0
     ϵ_1 = 2.0
@@ -29,7 +29,7 @@ function main()
         println("num_tris = $(length(surf.tris)), E_cc = $E_cc, relative error cc = $(abs(E_cc - E_exact) / abs(E_exact)), E_ss = $(E_ss), relative error ss = $(abs(E_ss - E_exact) / abs(E_exact))")
 
         df = DataFrame(num_tris = length(surf.tris), E_exact = E_exact, E_cc = E_cc, E_ss = E_ss)
-        CSV.write("single_sphere.csv", df, append = true)
+        CSV.write("data/single_sphere.csv", df, append = true)
     end
 end
 
